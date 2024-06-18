@@ -1,6 +1,5 @@
 package com.gustavo.parkingcontrolapi.service;
 
-import com.gustavo.parkingcontrolapi.model.CarModel;
 import com.gustavo.parkingcontrolapi.model.ParkingSpotModel;
 import com.gustavo.parkingcontrolapi.repository.CarRepository;
 import com.gustavo.parkingcontrolapi.repository.ParkingSpotRepository;
@@ -30,8 +29,8 @@ public class ParkingSpotService {
         return carRepository.existsByLicensePlateCar(licensePlateCar);
     }
 
-    public boolean existsByCarModelId(UUID id) {
-        return spotRepository.existsByCarModelId(id);
+    public boolean existsByCarId(UUID id) {
+        return carRepository.existsById(id);
     }
 
     public boolean existsByParkingSpotNumber(String parkingSpotNumber) {

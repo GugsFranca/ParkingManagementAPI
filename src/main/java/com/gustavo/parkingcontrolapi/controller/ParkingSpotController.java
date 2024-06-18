@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class ParkingSpotController {
     @Autowired
     private CarService carService;
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECRUITER')")
     @PostMapping
     public ResponseEntity<Object> saveParkingSpot(@RequestBody @Valid ParkingSpotDto parkingSpotDto){
         if(parkingSpotService.existsByLicensePlateCar(parkingSpotDto.carModel().licensePlateCar())){
@@ -55,10 +57,14 @@ public class ParkingSpotController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(parkingSpotService.save(parkingSpotModel));
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECRUITER','ROLE_USER')")
     @GetMapping
     public ResponseEntity<Page<ParkingSpotModel>> getAllParkingSpots(@PageableDefault( sort = "registrationDate", direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(parkingSpotService.findAll(pageable));
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN', 'ROLE_RECRUITER')")
     @GetMapping("/{id}")
     public ResponseEntity<Object> getOneParkingSpots(@PathVariable(value = "id")UUID id){
         Optional<ParkingSpotModel> parkingSpot = parkingSpotService.findById(id);
@@ -67,6 +73,8 @@ public class ParkingSpotController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(parkingSpot.get());
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECRUITER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteParkingSpot(@PathVariable(value = "id") UUID id){
         Optional<ParkingSpotModel> parkingSpot = parkingSpotService.findById(id);
@@ -76,11 +84,13 @@ public class ParkingSpotController {
         var carId = parkingSpot.get().getCarModel().getId();
         parkingSpotService.delete(parkingSpot.get());
 
-        if (!parkingSpotService.existsByCarModelId(carId)){
+        if (!parkingSpotService.existsByCarId(carId)){
             carService.delete(carId);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Parking Spot deleted successfully.");
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RECRUITER')")
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateParkingSpot(@PathVariable(value = "id") UUID id, @RequestBody @Valid ParkingSpotDto parkingSpotDto){
         Optional<ParkingSpotModel> parkingSpotOptional = parkingSpotService.findById(id);

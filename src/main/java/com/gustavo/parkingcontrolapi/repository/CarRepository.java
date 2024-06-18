@@ -9,4 +9,6 @@ import java.util.UUID;
 @Repository
 public interface CarRepository extends JpaRepository<CarModel, UUID> {
     boolean existsByLicensePlateCar(String licensePlateCar);
+    boolean existsById(UUID id);
+
 }

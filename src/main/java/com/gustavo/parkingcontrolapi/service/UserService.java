@@ -6,6 +6,7 @@ import com.gustavo.parkingcontrolapi.model.UserModel;
 import com.gustavo.parkingcontrolapi.repository.RoleModelRepository;
 import com.gustavo.parkingcontrolapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,18 +32,19 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
     public UserModel createUser(UserModel userModel) {
-        List<RoleModel> roleModels = new ArrayList<>();
+        List<RoleModel> roleModel = new ArrayList<>();
 
-        for (RoleModel roleModel : userModel.getRoleModels()) {
-            RoleModel existingRole = roleModelRepository.findByRoleName(roleModel.getRoleName());
+        for (RoleModel roles : userModel.getRoleModels()) {
+            RoleModel existingRole = roleModelRepository.findByRoleName(roles.getRoleName());
             if (existingRole != null) {
-                roleModels.add(existingRole);
-            } else {
-                roleModels.add(roleModel);
-            }
+                roleModel.add(existingRole);
+            } else roleModel.add(roleModelRepository.save(roles));
         }
 
-        userModel.setRoleModels(roleModels);
+        userModel.setRoleModels(roleModel);
+        userModel.setPassword(new BCryptPasswordEncoder().encode(userModel.getPassword()));
+
+
         return userRepository.save(userModel);
     }
     public void deleteUser(UUID id){
